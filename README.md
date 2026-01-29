@@ -24,7 +24,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_refresh_rate: ^1.0.0
+  flutter_refresh_rate: ^0.0.7
 ```
 
 Then run:
