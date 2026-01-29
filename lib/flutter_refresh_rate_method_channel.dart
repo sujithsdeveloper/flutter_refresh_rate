@@ -37,4 +37,12 @@ class MethodChannelFlutterRefreshRate extends FlutterRefreshRatePlatform {
 
     return DisplayMode.fromMap(result);
   }
+
+  @override
+  Future<bool> setPreferredMode(int modeId) async {
+    final bool result = await methodChannel.invokeMethod('setPreferredMode', {
+      'modeId': modeId,
+    });
+    return result;
+  }
 }

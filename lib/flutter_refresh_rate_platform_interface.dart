@@ -45,4 +45,12 @@ abstract class FlutterRefreshRatePlatform extends PlatformInterface {
   Future<DisplayMode> getActiveMode() {
     throw UnimplementedError('getActiveMode() has not been implemented.');
   }
+
+  /// Sets the preferred display mode by mode ID.
+  ///
+  /// This allows changing the display refresh rate.
+  /// Requires Android 6.0 (API level 23) or higher.
+  Future<bool> setPreferredMode(int modeId) {
+    throw UnimplementedError('setPreferredMode() has not been implemented.');
+  }
 }

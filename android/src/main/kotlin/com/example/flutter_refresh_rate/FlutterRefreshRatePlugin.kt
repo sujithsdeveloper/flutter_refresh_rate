@@ -28,6 +28,7 @@ class FlutterRefreshRatePlugin :
         private const val METHOD_GET_SUPPORTED_MODES = "getSupportedModes"
         private const val METHOD_GET_ACTIVE_MODE = "getActiveMode"
         private const val METHOD_GET_PLATFORM_VERSION = "getPlatformVersion"
+        private const val METHOD_SET_PREFERRED_MODE = "setPreferredMode"
     }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -61,6 +62,23 @@ class FlutterRefreshRatePlugin :
                     return
                 }
                 result.success(getActiveMode())
+            }
+            METHOD_SET_PREFERRED_MODE -> {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                    result.error("UNSUPPORTED", "Android 6.0+ required for display modes", null)
+                    return
+                }
+                if (activity == null) {
+                    result.error("NO_ACTIVITY", "Activity not attached", null)
+                    return
+                }
+                val modeId = call.argument<Int>("modeId")
+                if (modeId == null) {
+                    result.error("INVALID_ARGUMENT", "modeId is required", null)
+                    return
+                }
+                setPreferredMode(modeId)
+                result.success(true)
             }
             else -> result.notImplemented()
         }
@@ -104,6 +122,18 @@ class FlutterRefreshRatePlugin :
             "height" to mode.physicalHeight,
             "refreshRate" to mode.refreshRate
         )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun setPreferredMode(modeId: Int) {
+        activity?.let { act ->
+            act.runOnUiThread {
+                val window = act.window
+                val params = window.attributes
+                params.preferredDisplayModeId = modeId
+                window.attributes = params
+            }
+        }
     }
 
     // Activity lifecycle callbacks

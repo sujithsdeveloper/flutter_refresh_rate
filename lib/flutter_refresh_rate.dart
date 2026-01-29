@@ -23,7 +23,7 @@ class FlutterRefreshRate {
   ///
   /// Example:
   /// ```dart
-  /// final refreshRate = FlutterRefreshRate();
+  /// final refreshRate = FlutterRefreshRate();ph
   /// final modes = await refreshRate.getSupportedModes();
   /// for (final mode in modes) {
   ///   print('${mode.width}x${mode.height} @ ${mode.refreshRate}Hz');
@@ -53,5 +53,59 @@ class FlutterRefreshRate {
   /// - Activity is not attached
   Future<DisplayMode> getActiveMode() {
     return FlutterRefreshRatePlatform.instance.getActiveMode();
+  }
+
+  /// Sets the preferred display mode by mode ID.
+  ///
+  /// Use this to change the display refresh rate. Pass the [modeId]
+  /// from one of the [DisplayMode] objects returned by [getSupportedModes].
+  ///
+  /// Example:
+  /// ```dart
+  /// final refreshRate = FlutterRefreshRate();
+  /// final modes = await refreshRate.getSupportedModes();
+  /// // Find the mode with highest refresh rate
+  /// final maxMode = modes.reduce((a, b) =>
+  ///     a.refreshRate > b.refreshRate ? a : b);
+  /// await refreshRate.setPreferredMode(maxMode.modeId);
+  /// ```
+  ///
+  /// Returns `true` if the mode was set successfully.
+  ///
+  /// Throws [PlatformException] if:
+  /// - Android version is below 6.0 (API 23)
+  /// - Activity is not attached
+  /// - Invalid modeId is provided
+  Future<bool> setPreferredMode(int modeId) {
+    return FlutterRefreshRatePlatform.instance.setPreferredMode(modeId);
+  }
+
+  /// Sets the display to the maximum available refresh rate.
+  ///
+  /// This is a convenience method that finds the highest refresh rate
+  /// among the supported display modes and sets it as the preferred mode.
+  ///
+  /// Example:
+  /// ```dart
+  /// final refreshRate = FlutterRefreshRate();
+  /// await refreshRate.setMaxRefreshRate();
+  /// ```
+  ///
+  /// Returns the [DisplayMode] that was set.
+  ///
+  /// Throws [PlatformException] if:
+  /// - Android version is below 6.0 (API 23)
+  /// - Activity is not attached
+  /// - No supported modes are available
+  Future<DisplayMode> setMaxRefreshRate() async {
+    final modes = await getSupportedModes();
+    if (modes.isEmpty) {
+      throw Exception('No supported display modes available');
+    }
+    final maxMode = modes.reduce(
+      (a, b) => a.refreshRate > b.refreshRate ? a : b,
+    );
+    await setPreferredMode(maxMode.modeId);
+    return maxMode;
   }
 }

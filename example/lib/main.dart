@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -43,6 +45,9 @@ class _MyAppState extends State<MyApp> {
     }
 
     try {
+      // Set maximum refresh rate on startup
+      await _flutterRefreshRatePlugin.setMaxRefreshRate();
+
       activeMode = await _flutterRefreshRatePlugin.getActiveMode();
       supportedModes = await _flutterRefreshRatePlugin.getSupportedModes();
     } on PlatformException catch (e) {
@@ -66,88 +71,108 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(title: const Text('Flutter Refresh Rate Example')),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Platform: $_platformVersion',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 24),
-              if (_error != null) ...[
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  'Error: $_error',
-                  style: const TextStyle(color: Colors.red),
+                  'Platform: $_platformVersion',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-              ] else ...[
-                Text(
-                  'Active Display Mode',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                if (_activeMode != null)
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Mode ID: ${_activeMode!.modeId}'),
-                          Text(
-                            'Resolution: ${_activeMode!.width} x ${_activeMode!.height}',
-                          ),
-                          Text(
-                            'Refresh Rate: ${_activeMode!.refreshRate.toStringAsFixed(2)} Hz',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                const SizedBox(height: 24),
+                if (_error != null) ...[
+                  Text(
+                    'Error: $_error',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ] else ...[
+                  Text(
+                    'Active Display Mode',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  if (_activeMode != null)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Mode ID: ${_activeMode!.modeId}'),
+                            Text(
+                              'Resolution: ${_activeMode!.width} x ${_activeMode!.height}',
                             ),
-                          ),
-                        ],
+                            Text(
+                              'Refresh Rate: ${_activeMode!.refreshRate.toStringAsFixed(2)} Hz',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Supported Display Modes (${_supportedModes.length})',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                const SizedBox(height: 24),
-                Text(
-                  'Supported Display Modes (${_supportedModes.length})',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _supportedModes.length,
-                  itemBuilder: (context, index) {
-                    final mode = _supportedModes[index];
-                    final isActive = _activeMode?.modeId == mode.modeId;
-                    return Card(
-                      color: isActive ? Colors.green.shade50 : null,
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: isActive
-                              ? Colors.green
-                              : Colors.grey,
-                          child: Text(
-                            '${mode.modeId}',
-                            style: const TextStyle(color: Colors.white),
+                  const SizedBox(height: 8),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _supportedModes.length,
+                    itemBuilder: (context, index) {
+                      final mode = _supportedModes[index];
+                      final isActive = _activeMode?.modeId == mode.modeId;
+                      return Card(
+                        color: isActive ? Colors.green.shade50 : null,
+                        child: ListTile(
+                          onTap: () async {
+                            try {
+                              await _flutterRefreshRatePlugin.setPreferredMode(
+                                mode.modeId,
+                              );
+                              // log('Set preferred mode to ID: ${mode.modeId}');
+                              await initPlatformState();
+                            } on PlatformException catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: ${e.message}'),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          leading: CircleAvatar(
+                            backgroundColor: isActive
+                                ? Colors.green
+                                : Colors.grey,
+                            child: Text(
+                              '${mode.modeId}',
+                              style: const TextStyle(color: Colors.white),
+                            ),
                           ),
+                          title: Text('${mode.width} x ${mode.height}'),
+                          subtitle: Text(
+                            '${mode.refreshRate.toStringAsFixed(2)} Hz',
+                          ),
+                          trailing: isActive
+                              ? const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                )
+                              : null,
                         ),
-                        title: Text('${mode.width} x ${mode.height}'),
-                        subtitle: Text(
-                          '${mode.refreshRate.toStringAsFixed(2)} Hz',
-                        ),
-                        trailing: isActive
-                            ? const Icon(
-                                Icons.check_circle,
-                                color: Colors.green,
-                              )
-                            : null,
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton(
