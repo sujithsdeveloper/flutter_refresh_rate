@@ -1,3 +1,14 @@
+## 0.0.3
+
+* Updated documentation and package metadata.
+
+## 0.0.2
+
+* Updated documentation and package metadata.
+
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Initial release with support for Android devices.
+* Get current display refresh rate.
+* Get list of available display modes.
+* Set preferred display mode.
