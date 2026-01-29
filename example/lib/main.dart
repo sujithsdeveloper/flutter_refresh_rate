@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -135,16 +133,14 @@ class _MyAppState extends State<MyApp> {
                               await _flutterRefreshRatePlugin.setPreferredMode(
                                 mode.modeId,
                               );
-                              // log('Set preferred mode to ID: ${mode.modeId}');
+                              debugPrint(
+                                'Set preferred mode to ID: ${mode.modeId}',
+                              );
                               await initPlatformState();
                             } on PlatformException catch (e) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error: ${e.message}'),
-                                  ),
-                                );
-                              }
+                              debugPrint(
+                                'Error setting preferred mode: ${e.message}',
+                              );
                             }
                           },
                           leading: CircleAvatar(

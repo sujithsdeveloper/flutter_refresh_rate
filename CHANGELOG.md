@@ -1,3 +1,6 @@
+## 0.0.4
+* platform added
+
 ## 0.0.3
 
 * Updated documentation and package metadata.
