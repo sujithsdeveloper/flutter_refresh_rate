@@ -1,7 +1,9 @@
 name: flutter_refresh_rate
-description: "A new Flutter plugin project."
+description: "A Flutter plugin to get and set display refresh rate and resolution information on Android devices."
 version: 0.0.1
-homepage:
+homepage: https://github.com/sujithsdeveloper/flutter_refresh_rate
+repository: https://github.com/sujithsdeveloper/flutter_refresh_rate
+issue_tracker: https://github.com/sujithsdeveloper/flutter_refresh_rate/issues
 
 environment:
   sdk: ^3.10.1
